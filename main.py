@@ -1,6 +1,7 @@
 from zoombot.streams import SpeechToTextStream, TextToSpeechStream
 from zoombot.mitsuku import Mitsuku
 from zoombot.consts import Voices
+from zoombot.voice_command import SpotifyVoiceCommand, YoutubeVoiceCommand
 
 from contextlib import ExitStack
 
@@ -95,14 +96,18 @@ def zoom():
             # and skip it.
             if _sequence_diff(prev_response, message) > 0.85:
                 continue
-
-            # Process voice command here
-            # make API call to spotify/youtube, get response
-            print(_format_message(USERNAME, message))
-            response = mitsuku.send(message)
-            prev_response = response
-            print(_format_message(BOTNAME, response))
-            tts_stream.write(response)
+            elif YoutubeVoiceCommand.is_valid(message):
+                data = YoutubeVoiceCommand(message).data
+                tts_stream.output_stream.write(data)
+            elif SpotifyVoiceCommand.is_valid(message):
+                data = SpotifyVoiceCommand(message).data
+                tts_stream.output_stream.write(data)
+            else:
+                print(_format_message(USERNAME, message))
+                response = mitsuku.send(message)
+                prev_response = response
+                print(_format_message(BOTNAME, response))
+                tts_stream.write(response)
 
 
 def main():

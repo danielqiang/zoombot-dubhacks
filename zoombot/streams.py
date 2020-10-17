@@ -35,7 +35,7 @@ class SpeechToTextStream(InputStream):
         *args,
         **kwargs
     ):
-        self._input_stream = RecordingStream(
+        self.input_stream = RecordingStream(
             device=input_device, *args, **kwargs
         )
         self._client = speech.SpeechClient()
@@ -59,7 +59,7 @@ class SpeechToTextStream(InputStream):
     def _start_stream(self) -> Generator[str, None, None]:
         requests = (
             StreamingRecognizeRequest(audio_content=data)
-            for data in self._input_stream
+            for data in self.input_stream
         )
         stream = self._client.streaming_recognize(
             self._config, requests
@@ -86,7 +86,7 @@ class TextToSpeechStream(OutputStream):
         *args,
         **kwargs
     ):
-        self._output_stream = PlaybackStream(
+        self.output_stream = PlaybackStream(
             device=output_device, *args, **kwargs
         )
         self._client = tts.TextToSpeechClient()
@@ -113,7 +113,7 @@ class TextToSpeechStream(OutputStream):
                 voice=self._voice,
                 audio_config=self._audio_config,
             )
-            self._output_stream.write(response.audio_content)
+            self.output_stream.write(response.audio_content)
 
 
 def main():

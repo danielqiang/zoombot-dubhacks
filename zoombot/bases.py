@@ -7,6 +7,7 @@ __all__ = [
     "OutputStreamMixin",
     "InputStream",
     "OutputStream",
+    "VoiceCommand"
 ]
 
 
@@ -60,3 +61,20 @@ class InputStream(AbstractStream, InputStreamMixin):
 
 class OutputStream(AbstractStream, OutputStreamMixin):
     pass
+
+
+class VoiceCommand(ABC):
+    def __init__(self, message):
+        self.message = message
+
+    @staticmethod
+    @abstractmethod
+    def is_valid(message) -> bool:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def data(self) -> InputStream:
+        raise NotImplementedError
+
+
