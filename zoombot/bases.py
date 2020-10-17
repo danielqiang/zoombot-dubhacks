@@ -69,7 +69,7 @@ class VoiceCommand(ABC):
 
     @staticmethod
     @abstractmethod
-    def is_valid(message) -> bool:
+    def is_valid(message: str) -> bool:
         raise NotImplementedError
 
     @property
