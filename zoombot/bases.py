@@ -67,14 +67,7 @@ class VoiceCommand(ABC):
     def __init__(self, message):
         self.message = message
 
-    @staticmethod
-    @abstractmethod
-    def is_valid(message: str) -> bool:
-        raise NotImplementedError
-
     @property
     @abstractmethod
     def data(self) -> InputStream:
         raise NotImplementedError
-
-
