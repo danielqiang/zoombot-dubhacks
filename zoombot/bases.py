@@ -69,5 +69,5 @@ class VoiceCommand(ABC):
 
     @property
     @abstractmethod
-    def data(self) -> InputStream:
+    def data(self) -> Generator[Any, Any, None]:
         raise NotImplementedError

@@ -3,6 +3,7 @@ from zoombot.mitsuku import Mitsuku
 from zoombot.consts import Voices
 from zoombot.voice_command import SpotifyVoiceCommand, YoutubeVoiceCommand
 from zoombot.schema import VoiceCommandSchema
+from zoombot.audio import PlaybackStream
 
 from contextlib import ExitStack
 
@@ -71,21 +72,24 @@ def _sequence_diff(s1: str, s2: str):
 
 def zoom():
     with ExitStack() as stack:
-        vb_cable_input = "CABLE Input (VB-Audio Virtual C"  # speaker
-        vb_cable_output = "CABLE Output (VB-Audio Virtual "  # mic
+        # vb_cable_input = "CABLE Input (VB-Audio Virtual C"  # speaker
+        # vb_cable_output = "CABLE Output (VB-Audio Virtual "  # mic
 
         stt_stream = stack.enter_context(
             # TODO: input device should be output of speaker, not mic
-            SpeechToTextStream(input_device=vb_cable_output)
+            SpeechToTextStream()
         )
         tts_stream = stack.enter_context(
             TextToSpeechStream(
-                output_device=vb_cable_input,
                 language_code=VOICE.language_code,
                 voice_name=VOICE.name,
+                # sample_rate=44100,
+                channels=2
             )
         )
         mitsuku = stack.enter_context(Mitsuku())
+
+
 
         print("ZoomBot initialized. Ready to go!")
         print("=" * 40)
@@ -95,11 +99,16 @@ def zoom():
             # ZoomBot currently echos when using VB Cable. If the message
             # is too similar to the previous response, assume it is an echo
             # and skip it.
+            message = 'hey zumba, play michael reeves on youtube'
             if _sequence_diff(prev_response, message) > 0.85:
                 continue
             elif VoiceCommandSchema.is_youtube_command(message):
-                data = YoutubeVoiceCommand(message).data
-                tts_stream.output_stream.write(data)
+                playback = PlaybackStream(
+                    sample_rate=44100,
+                    channels=2
+                )
+                data = b''.join(YoutubeVoiceCommand(message).data)
+                playback.write(data)
             elif VoiceCommandSchema.is_spotify_command(message):
                 data = SpotifyVoiceCommand(message).data
                 tts_stream.output_stream.write(data)
@@ -112,8 +121,8 @@ def zoom():
 
 
 def main():
-    talk()
-    # zoom()
+    # talk()
+    zoom()
 
 
 if __name__ == "__main__":
