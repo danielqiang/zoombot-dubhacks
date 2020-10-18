@@ -9,7 +9,7 @@ from contextlib import ExitStack
 import pyaudio
 
 VOICE = Voices.DEFAULT
-USERNAME = "Arjun"
+USERNAME = "Daniel"
 BOTNAME = "ZoomBot"
 
 
@@ -108,7 +108,7 @@ def zoom():
 
                 playback = PlaybackStream(rate=44100, channels=2)
                 for i in range(0, len(data), DEFAULT_CHUNK):
-                    chunk = data[i: i + DEFAULT_CHUNK]
+                    chunk = data[i : i + DEFAULT_CHUNK]
                     playback.write(chunk)
                 playback.close()
             elif VoiceCommandSchema.is_spotify_command(message):
@@ -122,7 +122,7 @@ def zoom():
 
                 playback = PlaybackStream(rate=44100, sample_format=pyaudio.paInt32)
                 for i in range(0, len(data), DEFAULT_CHUNK):
-                    chunk = data[i: i + DEFAULT_CHUNK]
+                    chunk = data[i : i + DEFAULT_CHUNK]
                     playback.write(chunk)
                 playback.close()
             else:
