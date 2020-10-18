@@ -4,7 +4,7 @@ import threading
 from abc import abstractmethod
 from typing import Generator, List
 from .bases import AbstractStream, InputStreamMixin, OutputStreamMixin
-from .consts import DEFAULT_RATE, DEFAULT_CHUNK, DEFAULT_CHANNELS, DEFAULT_SAMPLE_WIDTH
+from .consts import DEFAULT_RATE, DEFAULT_CHUNK, DEFAULT_CHANNELS, DEFAULT_SAMPLE_FORMAT
 
 __all__ = ["PyAudioStream", "RecordingStream", "PlaybackStream"]
 
@@ -15,15 +15,28 @@ class PyAudioStream(AbstractStream):
         rate: int = DEFAULT_RATE,
         chunk: int = DEFAULT_CHUNK,
         channels: int = DEFAULT_CHANNELS,
-        sample_width: int = DEFAULT_SAMPLE_WIDTH,
         sample_rate: int = None,
+        sample_format: int = DEFAULT_SAMPLE_FORMAT,
         device: str = None,
     ):
         self.rate = rate
         self.chunk = chunk
         self.channels = channels
-        self.sample_width = sample_width
         self.sample_rate = sample_rate
+
+        valid_formats = {
+            pyaudio.paFloat32,
+            pyaudio.paInt32,
+            pyaudio.paInt24,
+            pyaudio.paInt16,
+            pyaudio.paInt8,
+            pyaudio.paUInt8,
+            pyaudio.paCustomFormat,
+        }
+        assert (
+            sample_format in valid_formats
+        ), f"Unrecognized sample format: {sample_format}"
+        self.sample_format = sample_format
 
         self._pa = pyaudio.PyAudio()
         # pyaudio.Stream object, initialized in _open_pa_stream()
@@ -114,7 +127,7 @@ class RecordingStream(PyAudioStream, InputStreamMixin):
 
     def _open_pa_stream(self):
         self._pa_stream = self._pa.open(
-            format=pyaudio.get_format_from_width(self.sample_width),
+            format=self.sample_format,
             channels=self.channels,
             rate=self.rate,
             input=True,
@@ -154,7 +167,7 @@ class PlaybackStream(PyAudioStream, OutputStreamMixin):
 
     def _open_pa_stream(self):
         self._pa_stream = self._pa.open(
-            format=pyaudio.get_format_from_width(self.sample_width),
+            format=self.sample_format,
             channels=self.channels,
             rate=self.rate,
             output=True,
