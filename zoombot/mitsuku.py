@@ -57,9 +57,7 @@ class Mitsuku:
             "client_name": self.client_name,
         }
         headers = {"Referer": "https://www.pandorabots.com/mitsuku/"}
-        resp = self.session.post(
-            self._ENDPOINT, headers=headers, data=form_data
-        )
+        resp = self.session.post(self._ENDPOINT, headers=headers, data=form_data)
         return resp.json()
 
     def send(
@@ -84,9 +82,7 @@ class Mitsuku:
 
 def main():
     with Mitsuku() as mitsuku:
-        resp = mitsuku.send(
-            "What is the weather like today in Seattle?"
-        )
+        resp = mitsuku.send("What is the weather like today in Seattle?")
         print(resp)
 
 

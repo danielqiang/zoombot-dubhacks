@@ -7,7 +7,7 @@ __all__ = [
     "OutputStreamMixin",
     "InputStream",
     "OutputStream",
-    "VoiceCommand"
+    "VoiceCommand",
 ]
 
 

@@ -4,7 +4,7 @@ import threading
 from abc import abstractmethod
 from typing import Generator, List
 from .bases import AbstractStream, InputStreamMixin, OutputStreamMixin
-from .consts import DEFAULT_RATE, DEFAULT_CHUNK
+from .consts import DEFAULT_RATE, DEFAULT_CHUNK, DEFAULT_CHANNELS, DEFAULT_SAMPLE_WIDTH
 
 __all__ = ["PyAudioStream", "RecordingStream", "PlaybackStream"]
 
@@ -14,11 +14,15 @@ class PyAudioStream(AbstractStream):
         self,
         rate: int = DEFAULT_RATE,
         chunk: int = DEFAULT_CHUNK,
+        channels: int = DEFAULT_CHANNELS,
+        sample_width: int = DEFAULT_SAMPLE_WIDTH,
         sample_rate: int = None,
         device: str = None,
     ):
         self.rate = rate
         self.chunk = chunk
+        self.channels = channels
+        self.sample_width = sample_width
         self.sample_rate = sample_rate
 
         self._pa = pyaudio.PyAudio()
@@ -27,10 +31,7 @@ class PyAudioStream(AbstractStream):
 
         self.is_open = False
 
-        devices = {
-            device["name"]: device
-            for device in self.available_devices()
-        }
+        devices = {device["name"]: device for device in self.available_devices()}
         if (device is not None) and device not in devices:
             raise ValueError(f"Could not find device: {device}")
         self.device = device or self.default_device()
@@ -105,9 +106,7 @@ class RecordingStream(PyAudioStream, InputStreamMixin):
                 self._has_data.clear()
             yield b"".join(data)
 
-    def _write_buffer(
-        self, in_data, frame_count, time_info, status_flags
-    ):
+    def _write_buffer(self, in_data, frame_count, time_info, status_flags):
         with self._mutex:
             self._buffer.append(in_data)
             self._has_data.set()
@@ -115,8 +114,8 @@ class RecordingStream(PyAudioStream, InputStreamMixin):
 
     def _open_pa_stream(self):
         self._pa_stream = self._pa.open(
-            format=pyaudio.paInt16,
-            channels=1,
+            format=pyaudio.get_format_from_width(self.sample_width),
+            channels=self.channels,
             rate=self.rate,
             input=True,
             input_device_index=self._device_idx,
@@ -155,8 +154,8 @@ class PlaybackStream(PyAudioStream, OutputStreamMixin):
 
     def _open_pa_stream(self):
         self._pa_stream = self._pa.open(
-            format=pyaudio.paInt16,
-            channels=1,
+            format=pyaudio.get_format_from_width(self.sample_width),
+            channels=self.channels,
             rate=self.rate,
             output=True,
             output_device_index=self._device_idx,
