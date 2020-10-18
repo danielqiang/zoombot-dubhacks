@@ -1,6 +1,6 @@
 from zoombot.streams import SpeechToTextStream, TextToSpeechStream
 from zoombot.mitsuku import Mitsuku
-from zoombot.consts import Voices
+from zoombot.consts import Voices, DEFAULT_CHUNK
 from zoombot.voice_command import SpotifyVoiceCommand, YoutubeVoiceCommand
 from zoombot.schema import VoiceCommandSchema
 from zoombot.audio import PlaybackStream
@@ -9,7 +9,7 @@ from contextlib import ExitStack
 import pyaudio
 
 VOICE = Voices.DEFAULT
-USERNAME = "Daniel"
+USERNAME = "Arjun"
 BOTNAME = "ZoomBot"
 
 
@@ -107,7 +107,9 @@ def zoom():
                 data = b"".join(youtube_vc.data)
 
                 playback = PlaybackStream(rate=44100, channels=2)
-                playback.write(data)
+                for i in range(0, len(data), DEFAULT_CHUNK):
+                    chunk = data[i: i + DEFAULT_CHUNK]
+                    playback.write(chunk)
                 playback.close()
             elif VoiceCommandSchema.is_spotify_command(message):
                 spotify_vc = SpotifyVoiceCommand(message)
@@ -119,7 +121,9 @@ def zoom():
                 data = b"".join(spotify_vc.data)
 
                 playback = PlaybackStream(rate=44100, sample_format=pyaudio.paInt32)
-                playback.write(data)
+                for i in range(0, len(data), DEFAULT_CHUNK):
+                    chunk = data[i: i + DEFAULT_CHUNK]
+                    playback.write(chunk)
                 playback.close()
             else:
                 response = mitsuku.send(message)
