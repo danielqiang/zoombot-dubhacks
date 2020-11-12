@@ -1,3 +1,5 @@
+Collaborated with [Arjun Srivastava](https://github.com/guitarjun), Sanjana Sathyanarayanan, Abhishek Shah
+
 # zoombot
 **zoombot** is a chatbot that can talk to meeting participants on [Zoom](https://zoom.us/) 
 in real time via voice (no chat messaging necessary), in addition to supporting voice commands for Spotify/YouTube audio.
